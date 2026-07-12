@@ -180,8 +180,8 @@
   .formnote.bad{color:#E8735A;font-weight:700}
 
   /* ---------------- FOOTER ---------------- */
-  footer{position:relative;padding:110px 0 0;border-top:1px solid var(--line);
-         background:rgba(6,14,18,.78);backdrop-filter:blur(10px);overflow:hidden}
+  footer{position:relative;padding:110px 0 34px;border-top:1px solid var(--line);
+         background:rgba(6,14,18,.78);backdrop-filter:blur(10px);overflow-x:hidden}
   footer .ridge{position:absolute;top:0;left:0;width:100%;height:60px;display:block;opacity:.9}
   .foot-top{display:flex;gap:52px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start}
 
@@ -203,17 +203,24 @@
   .live .arr{margin-left:auto;color:var(--ember);font-size:1.1rem;transition:transform .25s ease}
   .live:hover .arr{transform:translateX(4px)}
 
-  /* THE GHOST WORDMARK. Oversized type as the design, and it fills the bottom of the page instead
-     of leaving a hole. Clipped by the footer edge on purpose: it reads as a mark, not a heading. */
-  .bigmark{position:relative;margin-top:70px;height:clamp(90px,15vw,200px);overflow:hidden;
+  /* THE GHOST WORDMARK. Oversized type as the design, filling the bottom of the page instead of
+     leaving a hole.
+     ⚠️ It is NOT clipped. The first version fixed the height and pushed the type down by 14%, which
+     sheared the bottoms off the letters and cut the dog's paws at the page edge. Let the content set
+     the height and give it real room to stand in: overflow-x only, so a wide wordmark on a narrow
+     screen still cannot cause a sideways scroll. */
+  .bigmark{position:relative;margin-top:76px;padding-bottom:52px;overflow-x:hidden;
            display:flex;align-items:flex-end;justify-content:center}
-  .ghost{font-family:'Bricolage',system-ui,sans-serif;font-weight:800;
-         font-size:clamp(4.5rem,19vw,17rem);letter-spacing:-.06em;line-height:.78;
-         color:rgba(237,241,230,.045);-webkit-text-stroke:1px rgba(157,176,166,.10);
-         white-space:nowrap;transform:translateY(14%);user-select:none}
-  #footdog{position:absolute;right:6%;bottom:0;width:clamp(120px,13vw,210px);
+  .bigword{font-family:'Bricolage',system-ui,sans-serif;font-weight:800;
+         font-size:clamp(3.4rem,15vw,13.5rem);letter-spacing:-.05em;line-height:1.02;
+         color:rgba(237,241,230,.05);-webkit-text-stroke:1px rgba(157,176,166,.10);
+         white-space:nowrap;user-select:none}
+  #footdog{position:absolute;right:5%;bottom:52px;width:clamp(120px,13vw,210px);
            height:clamp(104px,12vw,182px);pointer-events:none}
-  @media(max-width:640px){ #footdog{right:2%;width:110px;height:96px} }
+  @media(max-width:760px){
+    .bigmark{padding-bottom:34px}
+    #footdog{right:2%;bottom:34px;width:112px;height:98px}
+  }
   .foot-brand{display:flex;align-items:center;gap:18px}
   .foot-mark{width:62px;height:auto;display:block;flex:none;
              filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))}
@@ -437,7 +444,7 @@
   <!-- He scrolled out of the hero with the bank, so he is waiting at the bottom of the page,
        sitting on the wordmark, still watching for the moon. A bookend. -->
   <div class="bigmark" aria-hidden="true">
-    <span class="ghost">COCONINO</span>
+    <span class="bigword">COCONINO</span>
     <canvas id="footdog"></canvas>
   </div>
 </footer>
