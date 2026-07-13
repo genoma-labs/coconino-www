@@ -467,6 +467,23 @@
    and stands there with his paws on the bark looking up, tail going, every single time.
    He never catches one. That is the joke, and it is also the truth about dogs.
 
+   AND HE ANSWERS THE WOOD. Nicola: "add a ball" -> "he also does the other animations,
+   going into the water, running toward owls and coyotes". So his evening is now five
+   things, and the wood gets a reaction out of him instead of being scenery:
+     - THE BALL. He drops it at your feet, you throw it, he brings it back. The only game
+       he can win, on the same grass as the chase he cannot.
+     - THE WATER. He runs the bank, leaps, swims, climbs out and shakes.
+     - THE SQUIRREL. He loses. Always.
+     - THE OWL. He runs UNDER it with his eyes up, then barks at a bird thirty feet over
+       his head. He knows he cannot reach it. He goes anyway.
+     - THE COYOTE. This one he does not chase. He holds the line at the water and HOWLS
+       BACK. Two dogs, one moon. That is why the coyote is in the scene at all.
+
+   He is allowed to be tired (dog.rest) and allowed not to care (a coin), because without
+   both throttles he answers every owl and every coyote, is never idle long enough to want
+   the ball or the water, and the whole evening collapses into barking at the sky.
+   Gate: src/web/test_forest_ball.js runs 4 minutes of the real state machine headlessly.
+
    THE DESCENT. Scrolling walks you down into the forest: the bank you are standing on
    falls away, the ranks open out, fog thickens, fireflies multiply, and a scrim fades in
    so type stays readable over moving art. Depth is speed paired with colour and haze.
@@ -1057,6 +1074,23 @@
     ctx.restore();
   }
 
+  /* ------------------------------------------------------ what he notices -- */
+  /* He does not run on a timer alone: the wood ACTS and he ANSWERS. An owl crosses and he goes after
+     it with his eyes up; a coyote sings on the far bank and he sings back. Each animal is marked
+     `seen` once he has reacted to it, so one owl is one event, not a loop he gets stuck in. */
+  function flyingOwl() {
+    for (var i = 0; i < owls.length; i++)
+      if (owls[i].st === 'fly' && !owls[i].seen) return owls[i];
+    return null;
+  }
+  function singingCoyote() {
+    for (var i = 0; i < coyotes.length; i++)
+      if (coyotes[i].st === 'howl' && !coyotes[i].seen) return coyotes[i];
+    return null;
+  }
+  /* He will not go in the water after them. He stops on the bank, every time. */
+  function bankLimit() { return pool.cx - pool.rx - (H * 0.165) * 0.35; }
+
   /* ---------------------------------------------------------- his evening -- */
   /* He is not on a fixed loop any more: he REACTS. Sometimes he goes for a swim; sometimes a
      squirrel breaks cover and he cannot let it go. He never catches one. */
@@ -1068,13 +1102,80 @@
     if (st === 'sit') {
       x = dog.homeX;
       pose = { head: -0.42, wag: t * 2.4 };                 /* nose up at the moon */
-      if (t >= dog.next) {
+
+      /* THE WOOD INTERRUPTS HIM: a live event beats his own schedule.
+         But he is allowed to be TIRED and he is allowed not to care. Two throttles, and both are
+         load-bearing -- without them he answers every owl and every coyote, is never idle long
+         enough to want the ball or the water, and the whole evening collapses into one loop of
+         barking at the sky (measured: fetches 5 -> 1 and swims 3 -> 1 over four minutes).
+           1. dog.rest -- a quiet beat after anything he just did.
+           2. a coin -- sometimes a dog watches an owl go over and simply cannot be bothered.
+         Either way the animal is marked `seen`, so he settles on one verdict about it instead of
+         relitigating it every frame. */
+      var O0 = flyingOwl(), K0 = singingCoyote();
+      if (t >= dog.rest && (K0 || O0)) {
+        if (K0) {                                           /* a coyote outranks an owl: it is the
+                                                               one that is closer to being a problem,
+                                                               and it almost always gets an answer */
+          K0.seen = true;
+          if (Math.random() < 0.80) { dog.coy = K0; dog.st = 'coyalert'; dog.since = t; }
+        } else {
+          O0.seen = true;
+          if (Math.random() < 0.55) { dog.bird = O0; dog.st = 'owlwatch'; dog.since = t; }
+        }
+      } else if (t >= dog.next) {
         var r0 = Math.random();
         if (r0 < 0.32) { dog.st = 'run'; }                                    /* a swim */
         else if (r0 < 0.62) { dog.quarry = spawnSquirrel(); dog.st = 'alert'; } /* a squirrel */
         else { throwBall(); dog.st = 'watch'; }                               /* the ball goes out */
         dog.since = t; dog.splashed = false;
       }
+
+    /* ---- the owl. He cannot reach it. He knows he cannot reach it. He goes anyway. ---- */
+    } else if (st === 'owlwatch') {
+      x = dog.homeX;
+      pose = { head: -0.78, wag: t * 8, perk: 1 };            /* head straight up, following it over */
+      if (e > 0.45) { dog.st = 'owlrun'; dog.since = t; }
+    } else if (st === 'owlrun') {
+      var O = dog.bird;
+      /* he runs UNDER it, tracking it across the sky, which is why he never watches where he is going */
+      var ox = O ? clamp(O.x - (H * 0.165) * 0.40, W * 0.03, bankLimit()) : dog.homeX;
+      dog.x += (ox - dog.x) * Math.min(1, dt * 2.4);
+      x = dog.x;
+      pose = { lift: Math.abs(Math.sin(t * 16)) * 4, rot: -0.05, head: -0.70,
+               leg: t * 16, wag: t * 12, perk: 1 };
+      if (!O || O.st !== 'fly' || e > 3.2) { dog.st = 'owlbark'; dog.since = t; }
+    } else if (st === 'owlbark') {
+      /* up on his hind legs, barking at a bird thirty feet over his head. The bark is a PULSE:
+         a hitch in the chest and a snap of the head, because we have no sound to work with. */
+      x = dog.x;
+      var bk = Math.max(0, Math.sin(t * 9));
+      var rr = Math.min(1, e * 2.5);
+      pose = { rear: rr * 0.7, rot: -0.22 * rr, head: -0.72 - bk * 0.12, lift: bk * 2.5,
+               leg: 0.15, wag: t * 13, perk: 1 };
+      if (e > 2.6) { dog.st = 'back'; dog.since = t; }
+
+    /* ---- the coyote. He does not chase this one. He ANSWERS it. ---- */
+    } else if (st === 'coyalert') {
+      x = dog.homeX;
+      pose = { head: -0.08, wag: t * 2.2, perk: 1 };          /* rigid. ears up. barely a wag. */
+      if (e > 0.7) { dog.st = 'coyrun'; dog.since = t; }
+    } else if (st === 'coyrun') {
+      var K = dog.coy;
+      /* he goes at it, and then the water stops him, and he holds that line */
+      var kx = K ? clamp(K.x - (H * 0.165) * 0.80, W * 0.03, bankLimit()) : dog.homeX;
+      dog.x += (kx - dog.x) * Math.min(1, dt * 2.2);
+      x = dog.x;
+      pose = { lift: Math.abs(Math.sin(t * 15)) * 3.4, rot: -0.06, head: -0.12,
+               leg: t * 15, wag: t * 7, perk: 1 };
+      if (Math.abs(dog.x - kx) < 10 || e > 2.8) { dog.st = 'coyhowl'; dog.since = t; }
+    } else if (st === 'coyhowl') {
+      /* the same shape the coyote is making, on the other side of the water. This is the whole
+         reason the coyote is in the scene. */
+      x = dog.x;
+      var hw = Math.min(1, e * 1.6);
+      pose = { head: -0.45 - hw * 0.55, rot: -0.05 * hw, leg: 0.05, wag: t * 2.2, perk: 1 };
+      if (e > 3.4) { dog.st = 'back'; dog.since = t; }
 
     /* ---- the ball ---- */
     } else if (st === 'watch') {
@@ -1114,7 +1215,7 @@
         ball.y = mouthY();
         ball.vx = rnd(-W * 0.01, W * 0.02); ball.vy = 0;
       }
-      if (e > 1.0) { dog.st = 'sit'; dog.since = t; dog.next = t + rnd(7, 13); }
+      if (e > 1.0) { dog.st = 'sit'; dog.since = t; dog.next = t + rnd(7, 13); dog.rest = t + rnd(4, 8); }
 
     /* ---- the chase ---- */
     } else if (st === 'alert') {
@@ -1141,7 +1242,7 @@
       pose = { rot: 0.03, head: -0.12, leg: t * 9, wag: t * 3.5 };   /* a slow, dignified walk back */
       if (Math.abs(dog.x - dog.homeX) < 6 || e > 3.2) {
         dog.st = 'sit'; dog.since = t; dog.x = dog.homeX;
-        dog.next = t + rnd(9, 15);
+        dog.next = t + rnd(9, 15); dog.rest = t + rnd(4, 8);
       }
 
     /* ---- the pool ---- */
@@ -1185,7 +1286,7 @@
       if (Math.random() < 0.5)
         drops.push({ x: x + rnd(-25, 25), y: dog.groundY - 55,
                      vx: rnd(-2.2, 2.2), vy: -rnd(0.4, 2.4), life: 1 });
-      if (e >= 1.3) { dog.st = 'sit'; dog.since = t; dog.next = t + rnd(8, 14); }
+      if (e >= 1.3) { dog.st = 'sit'; dog.since = t; dog.next = t + rnd(8, 14); dog.rest = t + rnd(4, 8); }
     } else {
       x = dog.homeX; pose = { head: -0.4 };
     }
@@ -1218,7 +1319,7 @@
     trees = makeTrees();
 
     /* He sits at the FAR LEFT, clear of the headline column. */
-    dog = { st: 'sit', since: 0, next: 5, splashed: false, quarry: null,
+    dog = { st: 'sit', since: 0, next: 5, rest: 3, splashed: false, quarry: null,
             homeX: W * 0.07, x: W * 0.07,
             groundY: GY + H * 0.012,                 /* PAWS ON THE GRASS */
             sink: (H * 0.165) * 0.42 };
