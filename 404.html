@@ -494,7 +494,12 @@
   var sc = 0, mx = 0, my = 0, px = 0, py = 0;
 
   var COAT = '#0B100E', TAN = '#B97C43', RED = '#C0303A', BLAZE = '#E6DCC8';
-  var moon = {}, pool = {}, dog = {};
+  /* The ball is a well-loved tennis ball seen by moonlight: pale and desaturated ON PURPOSE. A
+     saturated lime would take the eye off the bandana, and the bandana is the only true colour
+     in the hero. It is still the second-brightest thing on the bank, which is correct -- it is
+     the thing he is watching. */
+  var BALL = '#C7CE9B', BALL_D = '#8E9668', SEAM = '#EDEFE0';
+  var moon = {}, pool = {}, dog = {}, ball = {};
   var GY = 0, WY = 0;
 
   function rng(s) {
@@ -722,6 +727,22 @@
     g.fillStyle = TAN;
     g.beginPath(); g.ellipse(24, -32, 3.4, 2.6, -0.2, 0, 6.283); g.fill();
     g.beginPath(); g.ellipse(14, -30, 3.0, 2.4, -0.2, 0, 6.283); g.fill();
+    /* THE BALL, IN HIS MOUTH. Drawn inside the head group on purpose: it then inherits the head
+       rotation for free, so it swings with his head instead of floating beside it. */
+    if (pose.ball) {
+      g.save();
+      g.translate(42, -14);
+      g.rotate(-t * 1.2);
+      var bg = g.createRadialGradient(-BR * 0.35, -BR * 0.40, BR * 0.15, 0, 0, BR);
+      bg.addColorStop(0, BALL); bg.addColorStop(1, BALL_D);
+      g.fillStyle = bg;
+      g.beginPath(); g.arc(0, 0, BR, 0, 6.283); g.fill();
+      g.strokeStyle = SEAM; g.lineWidth = BR * 0.16;
+      g.beginPath(); g.arc(-BR * 1.05, 0, BR * 0.95, -0.85, 0.85); g.stroke();
+      g.beginPath(); g.arc(BR * 1.05, 0, BR * 0.95, Math.PI - 0.85, Math.PI + 0.85); g.stroke();
+      g.restore();
+    }
+
     /* FLOPPY ear, folded DOWN. Never cropped. It lifts when he is interested. */
     g.fillStyle = EAR;
     var per = pose.perk || 0;
@@ -941,6 +962,101 @@
     }
   }
 
+  /* ---------------------------------------------------------------- ball -- */
+  /* The oldest game there is. He drops it at your feet, you throw it, he brings it back, and he
+     would do this until one of you died. Unlike the squirrel, THIS one he always catches, which is
+     the point: the chase he cannot win and the game he cannot lose, on the same patch of grass.
+
+     Physics is in px/sec (not px/frame) so it is frame-rate independent, and every constant is a
+     fraction of W or H so it survives a resize.
+
+     ⚠️ The throw is deliberately kept SHORT of the water (bounds at W*0.33; the pool's left edge is
+     at cx-rx = W*0.365). A ball in the pool would need a whole swim-fetch branch, and a half-built
+     one would strand him paddling after something he cannot reach. */
+  var BR = 8;                                       /* radius in DOG-LOCAL units (dog is ~90 tall) */
+
+  function ballR() { return BR * ((H * 0.165) / 90); }
+  function ballGY() { return dog.groundY - ballR(); }
+  function mouthY() { return dog.groundY - (H * 0.165) * 0.72; }
+
+  function restBall() {
+    ball.x = dog.homeX + (H * 0.165) * 0.42;        /* at his front paws, where he left it */
+    ball.y = ballGY();
+    ball.vx = 0; ball.vy = 0; ball.spin = 0;
+    ball.held = false; ball.rest = true;
+  }
+
+  function throwBall() {
+    ball.held = false; ball.rest = false;
+    ball.x = dog.homeX + (H * 0.165) * 0.30;
+    ball.y = mouthY();
+    ball.vx = rnd(W * 0.26, W * 0.36);              /* out to the right, across the open grass */
+    ball.vy = -rnd(H * 0.42, H * 0.58);
+  }
+
+  function stepBall(dt) {
+    if (ball.held || ball.rest) return;
+    var R = ballR(), G = H * 1.75, gy = ballGY(), far = W * 0.33;
+
+    ball.vy += G * dt;
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+    ball.spin += (ball.vx * dt) / R;
+
+    if (ball.x > far) { ball.x = far; ball.vx = -Math.abs(ball.vx) * 0.35; }   /* checks off a root */
+    if (ball.x < R) { ball.x = R; ball.vx = Math.abs(ball.vx) * 0.35; }
+
+    if (ball.y >= gy) {
+      ball.y = gy;
+      if (Math.abs(ball.vy) > H * 0.03) {
+        ball.vy = -ball.vy * 0.52;                  /* bounce */
+        ball.vx *= 0.80;
+        ball.squash = 1;
+      } else {
+        ball.vy = 0;                                /* rolling now */
+        ball.vx -= ball.vx * 2.2 * dt;
+        if (Math.abs(ball.vx) < W * 0.012) { ball.vx = 0; ball.rest = true; }
+      }
+    }
+    ball.squash = Math.max(0, (ball.squash || 0) - dt * 6);
+  }
+
+  function drawBall(dy) {
+    if (ball.held) return;                          /* in his mouth: coco() draws it, so it inherits
+                                                       every transform his head already has */
+    var R = ballR(), gy = ballGY();
+    var air = clamp((gy - ball.y) / (H * 0.16), 0, 1);
+
+    /* the shadow tells you how high it is, which is the only depth cue a flat ball gets */
+    ctx.fillStyle = 'rgba(4,10,8,' + (0.42 * (1 - air * 0.75)).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.ellipse(ball.x, dog.groundY + dy + 1, R * (1.05 - air * 0.35), R * 0.34, 0, 0, 6.283);
+    ctx.fill();
+
+    var sq = ball.squash || 0;
+    ctx.save();
+    ctx.translate(ball.x, ball.y + dy);
+    ctx.scale(1 + sq * 0.22, 1 - sq * 0.22);        /* it deforms on the bounce, briefly */
+    ctx.rotate(ball.spin);
+
+    var g = ctx.createRadialGradient(-R * 0.35, -R * 0.40, R * 0.15, 0, 0, R);
+    g.addColorStop(0, BALL);                        /* lit from up-left, same as the moon */
+    g.addColorStop(1, BALL_D);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, 6.283); ctx.fill();
+
+    ctx.strokeStyle = SEAM;
+    ctx.lineWidth = Math.max(1, R * 0.16);
+    ctx.beginPath();
+    ctx.arc(-R * 1.05, 0, R * 0.95, -0.85, 0.85);   /* the two seams: this is what makes it read
+                                                       as a TENNIS ball and not a dot */
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(R * 1.05, 0, R * 0.95, Math.PI - 0.85, Math.PI + 0.85);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   /* ---------------------------------------------------------- his evening -- */
   /* He is not on a fixed loop any more: he REACTS. Sometimes he goes for a swim; sometimes a
      squirrel breaks cover and he cannot let it go. He never catches one. */
@@ -953,10 +1069,52 @@
       x = dog.homeX;
       pose = { head: -0.42, wag: t * 2.4 };                 /* nose up at the moon */
       if (t >= dog.next) {
-        if (Math.random() < 0.45) { dog.st = 'run'; }
-        else { dog.quarry = spawnSquirrel(); dog.st = 'alert'; }
+        var r0 = Math.random();
+        if (r0 < 0.32) { dog.st = 'run'; }                                    /* a swim */
+        else if (r0 < 0.62) { dog.quarry = spawnSquirrel(); dog.st = 'alert'; } /* a squirrel */
+        else { throwBall(); dog.st = 'watch'; }                               /* the ball goes out */
         dog.since = t; dog.splashed = false;
       }
+
+    /* ---- the ball ---- */
+    } else if (st === 'watch') {
+      /* He does not move yet. He tracks it up, and THEN he goes. That beat is the whole tell. */
+      x = dog.homeX;
+      pose = { head: -0.55, wag: t * 9, perk: 1 };
+      if (e > 0.28) { dog.st = 'fetch'; dog.since = t; }
+    } else if (st === 'fetch') {
+      var bx = ball.x - (H * 0.165) * 0.55;                 /* stop with his NOSE on it, not his body */
+      dog.x += (bx - dog.x) * Math.min(1, dt * 3.0);
+      x = dog.x;
+      pose = { lift: Math.abs(Math.sin(t * 18)) * 4.5, rot: -0.07, head: -0.10,
+               leg: t * 18, wag: t * 13, perk: 1 };
+      /* Only grab it if he actually GOT there. On a timeout he walks home empty-mouthed rather than
+         teleporting the ball into his jaw, which is what a lazy `|| e > 5` in the grab test would do. */
+      if (Math.abs(dog.x - bx) < 10 && ball.rest) { dog.st = 'grab'; dog.since = t; }
+      else if (e > 5) { dog.st = 'back'; dog.since = t; }
+    } else if (st === 'grab') {
+      x = dog.x;
+      pose = { head: 0.34, leg: 0.1, wag: t * 15, perk: 1 };  /* nose DOWN into the grass */
+      if (e > 0.34) { ball.held = true; ball.rest = false; dog.st = 'carry'; dog.since = t; }
+    } else if (st === 'carry') {
+      dog.x += (dog.homeX - dog.x) * Math.min(1, dt * 2.2);
+      x = dog.x;
+      /* head high, tail absolutely going. He is delighted with himself, and he should be. */
+      pose = { lift: Math.abs(Math.sin(t * 12)) * 2.2, head: -0.26, leg: t * 12, wag: t * 16,
+               perk: 1, ball: 1 };
+      if (Math.abs(dog.x - dog.homeX) < 6 || e > 4.5) {
+        dog.st = 'drop'; dog.since = t; dog.x = dog.homeX;
+      }
+    } else if (st === 'drop') {
+      x = dog.homeX;
+      pose = { head: 0.30, wag: t * 12, perk: 1, ball: e < 0.22 ? 1 : 0 };
+      if (e >= 0.22 && ball.held) {                          /* he opens his mouth: it FALLS */
+        ball.held = false; ball.rest = false;
+        ball.x = dog.homeX + (H * 0.165) * 0.44;
+        ball.y = mouthY();
+        ball.vx = rnd(-W * 0.01, W * 0.02); ball.vy = 0;
+      }
+      if (e > 1.0) { dog.st = 'sit'; dog.since = t; dog.next = t + rnd(7, 13); }
 
     /* ---- the chase ---- */
     } else if (st === 'alert') {
@@ -1064,6 +1222,8 @@
             homeX: W * 0.07, x: W * 0.07,
             groundY: GY + H * 0.012,                 /* PAWS ON THE GRASS */
             sink: (H * 0.165) * 0.42 };
+
+    restBall();                                  /* it is already at his paws when you arrive */
 
     squirrels = []; owls = []; coyotes = [];
     ripples = []; drops = [];
@@ -1174,6 +1334,9 @@
       stepSquirrels(dt, dy);
 
       var d = dogPose(dt);
+      stepBall(dt);
+      drawBall(dy);                      /* behind him: when he stands over it, he covers it */
+
       var s = (H * 0.165) / 90;
       ctx.save();
       if (d.pose.submerged) {                 /* the water cuts him where the water actually IS */
