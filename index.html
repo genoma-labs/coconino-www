@@ -252,6 +252,13 @@
     *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
     .rise{opacity:1;transform:none}
   }
+
+  /* --- latest episode --- */
+  #latest .latest-embed{position:relative;width:100%;max-width:900px;aspect-ratio:16/9;margin-top:34px;
+    border-radius:16px;overflow:hidden;background:var(--night);border:1px solid var(--line);
+    box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  #latest .latest-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  #latest .latest-title{margin-top:16px;color:var(--mist);font-size:.95rem;max-width:900px}
 </style>
 </head>
 <body>
@@ -352,6 +359,28 @@
       <blockquote class="rise d2">He loves the moon, coyotes, squirrels, and jumping in the pool.
          All four are in the forest above, if you wait for them.</blockquote>
     </div>
+  </div>
+</section>
+
+<section id="latest">
+  <div class="wrap">
+    <p class="eyebrow rise">Now streaming</p>
+    <h2 class="rise">The latest episode.</h2>
+    <p class="lead rise d1">Fresh from the studio. New episodes land on
+       <strong style="color:var(--moon)">Techno Crab</strong>, our channel for kids who like
+       real science with their cartoons.</p>
+<!-- LATEST_EPISODE:START -->
+      <div class="latest-embed rise d2">
+        <iframe src="https://www.youtube.com/embed/9MYd940KFQs" title="Techno Crab Goes to the MOON! Rocket Launch Adventure | Kids Cartoon Full Episode" loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <p class="latest-title rise d2">Techno Crab Goes to the MOON! Rocket Launch Adventure | Kids Cartoon Full Episode</p>
+      <!-- LATEST_EPISODE:END -->
+    <p class="rise d2" style="margin-top:26px">
+      <a class="cta" href="https://www.youtube.com/@techno_crab_kids" target="_blank" rel="noopener">
+        All episodes &nbsp;&rarr;</a>
+    </p>
   </div>
 </section>
 
