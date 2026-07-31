@@ -49,6 +49,59 @@
 }
 </script>
 
+<!-- Catalogue markup: what AI crawlers and search engines actually read to understand the studio's
+     work. Every field below is real - upload dates and ids come from the live watch pages. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CreativeWorkSeries",
+      "@id": "https://coconinoproductions.com/#technocrab",
+      "name": "Techno Crab",
+      "alternateName": "Techno Crab Kids",
+      "description": "Original kids cartoon series and dance songs about a DJ crab under the sea. Written, scored and animated in house by Coconino Productions.",
+      "genre": ["Children's animation", "Kids music"],
+      "inLanguage": "en",
+      "productionCompany": {"@id": "https://coconinoproductions.com/#studio"},
+      "url": "https://www.youtube.com/@coconino_kids"
+    },
+    {
+      "@type": "CreativeWorkSeries",
+      "@id": "https://coconinoproductions.com/#fluffypufffs",
+      "name": "Fluffy Pufffs",
+      "description": "Preschool cartoon series about five fluffy characters, built around feelings, counting and bedtime. Written, scored and animated in house by Coconino Productions.",
+      "genre": ["Preschool animation", "Children's animation"],
+      "inLanguage": "en",
+      "productionCompany": {"@id": "https://coconinoproductions.com/#studio"},
+      "url": "https://www.youtube.com/playlist?list=PLM1hFAeUryJs"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "Fluffy Pufffs Adventures | Lollipop Forest, Mountains & the Amusement Park | Full Episodes",
+      "description": "Full episodes of Fluffy Pufffs: the Lollipop Forest, the mountains and the amusement park.",
+      "thumbnailUrl": "https://i.ytimg.com/vi/H7XP-l3Xaqw/maxresdefault.jpg",
+      "uploadDate": "2026-07-29T10:45:29-07:00",
+      "embedUrl": "https://www.youtube.com/embed/H7XP-l3Xaqw",
+      "url": "https://www.youtube.com/watch?v=H7XP-l3Xaqw",
+      "isPartOf": {"@id": "https://coconinoproductions.com/#fluffypufffs"},
+      "publisher": {"@id": "https://coconinoproductions.com/#studio"}
+    },
+    {
+      "@type": "VideoObject",
+      "name": "Don't Forget Your POPCORN! Spooky Halloween Dance Song for Kids | Techno Crab",
+      "description": "A spooky Halloween dance song for kids, from the Techno Crab series.",
+      "thumbnailUrl": "https://i.ytimg.com/vi/7ZUFUCDGfzM/maxresdefault.jpg",
+      "uploadDate": "2026-07-23T20:08:02-07:00",
+      "embedUrl": "https://www.youtube.com/embed/7ZUFUCDGfzM",
+      "url": "https://www.youtube.com/watch?v=7ZUFUCDGfzM",
+      "isPartOf": {"@id": "https://coconinoproductions.com/#technocrab"},
+      "publisher": {"@id": "https://coconinoproductions.com/#studio"}
+    }
+  ]
+}
+</script>
+
 <style>
   @font-face{
     font-family:'Bricolage';
@@ -274,6 +327,14 @@
   #songs .tracks a:hover{color:var(--ember)}
   #songs .tracks .t{flex:1 1 auto;font-size:1rem}
   #songs .tracks .m{flex:0 0 auto;color:var(--mist);font-size:.82rem}
+
+  /* --- stats strip --- */
+  #latest .stats{display:flex;flex-wrap:wrap;gap:46px;margin-top:38px}
+  #latest .stat{display:flex;flex-direction:column;gap:6px}
+  #latest .stat .n{font-size:clamp(2.1rem,5vw,3.1rem);line-height:1;color:var(--moon);
+    font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  #latest .stat .l{font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mist)}
+  #latest .stats-note{margin-top:22px;color:var(--mist);font-size:.95rem;max-width:900px}
 </style>
 </head>
 <body>
@@ -400,6 +461,14 @@
           <span class="fine">youtube.com/@coconino_kids</span>
         </span>
       </div>
+<!-- SITE_STATS:START -->
+      <div class="stats">
+        <div class="stat rise d1"><span class="n">49</span><span class="l">videos published</span></div>
+        <div class="stat rise d1"><span class="n">15</span><span class="l">episodes</span></div>
+        <div class="stat rise d1"><span class="n">14</span><span class="l">original songs</span></div>
+      </div>
+      <p class="stats-note rise d2">5,033 total views and counting, across two original series &mdash; written, scored, animated and rendered in house.</p>
+      <!-- SITE_STATS:END -->
 <!-- LATEST_EPISODE:START -->
       <div class="latest-embed rise d2">
         <iframe src="https://www.youtube.com/embed/H7XP-l3Xaqw" title="Fluffy Pufffs Adventures | Lollipop Forest, Mountains &amp; the Amusement Park | Full Episodes" loading="lazy"
