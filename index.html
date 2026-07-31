@@ -259,6 +259,21 @@
     box-shadow:0 24px 60px rgba(0,0,0,.45)}
   #latest .latest-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   #latest .latest-title{margin-top:16px;color:var(--mist);font-size:.95rem;max-width:900px}
+
+  /* --- new songs --- */
+  #songs .latest-embed{position:relative;width:100%;max-width:900px;aspect-ratio:16/9;margin-top:34px;
+    border-radius:16px;overflow:hidden;background:var(--night);border:1px solid var(--line);
+    box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  #songs .latest-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  #songs .latest-title{margin-top:16px;color:var(--mist);font-size:.95rem;max-width:900px}
+  #songs .tracks{list-style:none;padding:0;margin:34px 0 0;max-width:900px;
+    border-top:1px solid var(--line)}
+  #songs .tracks li{border-bottom:1px solid var(--line)}
+  #songs .tracks a{display:flex;align-items:baseline;gap:14px;padding:15px 2px;
+    color:var(--moon);text-decoration:none;transition:color .2s ease}
+  #songs .tracks a:hover{color:var(--ember)}
+  #songs .tracks .t{flex:1 1 auto;font-size:1rem}
+  #songs .tracks .m{flex:0 0 auto;color:var(--mist);font-size:.82rem}
 </style>
 </head>
 <body>
@@ -387,13 +402,13 @@
       </div>
 <!-- LATEST_EPISODE:START -->
       <div class="latest-embed rise d2">
-        <iframe src="https://www.youtube.com/embed/mwonLnuc9KI" title="Techno Crab Finds the CANDY PLANET! Fluffy Pink Dream | Kids Cartoon Full Episode" loading="lazy"
+        <iframe src="https://www.youtube.com/embed/H7XP-l3Xaqw" title="Fluffy Pufffs Adventures | Lollipop Forest, Mountains &amp; the Amusement Park | Full Episodes" loading="lazy"
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
-      <p class="latest-title rise d2">Techno Crab Finds the CANDY PLANET! Fluffy Pink Dream | Kids Cartoon Full Episode</p>
+      <p class="latest-title rise d2">Fluffy Pufffs Adventures | Lollipop Forest, Mountains &amp; the Amusement Park | Full Episodes</p>
       <!-- LATEST_EPISODE:END -->
-      <p class="eyebrow rise d2" style="margin-top:40px">From Fluffy Pufffs</p>
+      <p class="eyebrow rise d2" style="margin-top:40px">Every Fluffy Pufffs episode</p>
       <div class="latest-embed rise d2">
         <iframe src="https://www.youtube.com/embed/videoseries?list=PLM1hFAeUryJs" title="Fluffy Pufffs Episodes" loading="lazy"
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -407,6 +422,38 @@
     </p>
   </div>
 </section>
+
+<!-- NEW_SONGS:START -->
+<section id="songs">
+  <div class="wrap">
+    <p class="eyebrow rise">New songs</p>
+    <h2 class="rise">Original music,<br>scored in house.</h2>
+    <p class="lead rise d1">Every song is written, performed and mixed here, then animated to match.
+       Newest first, starting with one for the spooky season.</p>
+
+    <div class="latest-embed rise d2">
+      <iframe src="https://www.youtube.com/embed/7ZUFUCDGfzM" title="Don&#39;t Forget Your POPCORN! Spooky Halloween Dance Song for Kids | Techno Crab" loading="lazy"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <p class="latest-title rise d2">Don&#39;t Forget Your POPCORN! &mdash; Spooky Halloween Dance Song for Kids</p>
+
+    <ul class="tracks rise d2">
+      <li><a href="https://www.youtube.com/watch?v=2zk9HisnvQc" target="_blank" rel="noopener">
+        <span class="t">Blue Whale Bass &mdash; Deep Sea Dance Song</span><span class="m">Dance</span></a></li>
+      <li><a href="https://www.youtube.com/watch?v=cZWaZUcix58" target="_blank" rel="noopener">
+        <span class="t">The Tide of Your Dreams &mdash; Calm Chill Music</span><span class="m">Calm</span></a></li>
+      <li><a href="https://www.youtube.com/watch?v=o4R37FDYrkk" target="_blank" rel="noopener">
+        <span class="t">Sleepy Sleepy &mdash; Bedtime Lullaby</span><span class="m">Lullaby</span></a></li>
+    </ul>
+
+    <p class="rise d2" style="margin-top:26px">
+      <a class="cta" href="https://www.youtube.com/@coconino_kids" target="_blank" rel="noopener">
+        All songs &nbsp;&rarr;</a>
+    </p>
+  </div>
+</section>
+<!-- NEW_SONGS:END -->
 
 <section id="contact">
   <div class="wrap">
